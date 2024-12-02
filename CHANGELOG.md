@@ -1,3 +1,7 @@
+# 4.5.0
+
+- `expose()` now returns a function that can be used to unregister the event listener
+
 # v3 -> v4
 
 - Added support for NodeJS 11+ workers
