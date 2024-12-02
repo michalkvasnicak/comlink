@@ -1,6 +1,6 @@
 {
   "name": "@michalkvasnicak/comlink",
-  "version": "4.4.2",
+  "version": "4.5.0",
   "description": "Comlink makes WebWorkers enjoyable",
   "main": "dist/umd/comlink.js",
   "module": "dist/esm/comlink.mjs",
