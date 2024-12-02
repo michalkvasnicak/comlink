@@ -294,12 +294,14 @@ function isAllowedOrigin(
   return false;
 }
 
+type UnregisterListenerFunction = () => void;
+
 export function expose(
   obj: any,
   ep: Endpoint = globalThis as any,
   allowedOrigins: (string | RegExp)[] = ["*"]
-) {
-  ep.addEventListener("message", function callback(ev: MessageEvent) {
+): UnregisterListenerFunction {
+  function callback(ev: MessageEvent) {
     if (!ev || !ev.data) {
       return;
     }
@@ -381,10 +383,23 @@ export function expose(
         });
         ep.postMessage({ ...wireValue, id }, transferables);
       });
-  } as any);
+  }
+
+  ep.addEventListener(
+    "message",
+    callback as EventListenerOrEventListenerObject
+  );
+
   if (ep.start) {
     ep.start();
   }
+
+  return function unregisterListener() {
+    ep.removeEventListener(
+      "message",
+      callback as EventListenerOrEventListenerObject
+    );
+  };
 }
 
 function isMessagePort(endpoint: Endpoint): endpoint is MessagePort {
@@ -396,7 +411,7 @@ function closeEndPoint(endpoint: Endpoint) {
 }
 
 export function wrap<T>(ep: Endpoint, target?: any): Remote<T> {
-  const pendingListeners : PendingListenersMap = new Map();
+  const pendingListeners: PendingListenersMap = new Map();
 
   ep.addEventListener("message", function handleMessage(ev: Event) {
     const { data } = ev as MessageEvent;
@@ -634,7 +649,7 @@ function requestResponseMessage(
       ep.start();
     }
     ep.postMessage({ id, ...msg }, transfers);
-});
+  });
 }
 
 function generateUUID(): string {
