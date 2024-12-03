@@ -301,6 +301,8 @@ export function expose(
   ep: Endpoint = globalThis as any,
   allowedOrigins: (string | RegExp)[] = ["*"]
 ): UnregisterListenerFunction {
+  const registeredListeners = [] as UnregisterListenerFunction[];
+
   function callback(ev: MessageEvent) {
     if (!ev || !ev.data) {
       return;
@@ -344,7 +346,7 @@ export function expose(
         case MessageType.ENDPOINT:
           {
             const { port1, port2 } = new MessageChannel();
-            expose(obj, port2);
+            registeredListeners.push(expose(obj, port2));
             returnValue = transfer(port1, [port1]);
           }
           break;
@@ -399,6 +401,10 @@ export function expose(
       "message",
       callback as EventListenerOrEventListenerObject
     );
+
+    for (const unregisterListener of registeredListeners) {
+      unregisterListener();
+    }
   };
 }
 
